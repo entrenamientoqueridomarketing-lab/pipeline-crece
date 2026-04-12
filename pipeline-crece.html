@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Querido Marketing · Pipeline · Sistema CRECE</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--bg:#f7f5f0;--surface:#fff;--surface2:#f0ede6;--border:#e2ddd5;--border2:#ccc8bf;--text:#1a1814;--text2:#6b6760;--text3:#9e9b96;--accent:#2a5cff;--accent-light:#eef1ff;--green:#1a7f5a;--green-light:#e6f5ef;--red:#c0392b;--red-light:#fdf0ee;--amber:#a05c00;--amber-light:#fef6e6;--radius:10px;--radius-lg:16px;--shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--shadow-md:0 4px 12px rgba(0,0,0,.08)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+.app{display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.main{margin-left:220px;flex:1}
+.logo{padding:22px 20px 18px;border-bottom:1px solid var(--border)}
+.logo-text{font-size:13px;font-weight:600;letter-spacing:-.3px}
+.logo-sub{font-size:11px;color:var(--text3);margin-top:2px;font-family:'DM Mono',monospace}
+.nav{padding:12px 10px;flex:1}
+.nav-section{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);padding:0 10px;margin:14px 0 6px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;color:var(--text2);font-size:13.5px;font-weight:400;transition:all .12s;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--accent-light);color:var(--accent);font-weight:500}
+.nav-icon{font-size:15px;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px;font-family:'DM Mono',monospace}
+.nav-badge.red{background:var(--red)}
+.sidebar-footer{padding:14px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)}
+.page-header{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.page-title{font-size:17px;font-weight:600;letter-spacing:-.3px}
+.page-sub{font-size:12px;color:var(--text3);margin-top:1px}
+.page{display:none;padding:24px 28px}
+.page.active{display:block}
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:22px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.kpi-card.hl-green{border-color:#1a7f5a;background:var(--green-light)}
+.kpi-card.hl-blue{border-color:#2a5cff;background:var(--accent-light)}
+.kpi-label{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.kpi-value{font-size:22px;font-weight:600;letter-spacing:-1px;font-family:'DM Mono',monospace}
+.kpi-delta{font-size:11px;margin-top:4px}
+.delta-pos{color:var(--green)}.delta-neg{color:var(--red)}.delta-neu{color:var(--text3)}
+.charts-row{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:14px}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow)}
+.chart-card h3{font-size:13px;font-weight:600;margin-bottom:16px}
+.funnel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow)}
+.funnel-card h3{font-size:13px;font-weight:600;margin-bottom:16px}
+.funnel-row{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.funnel-label{width:145px;font-size:12px;color:var(--text2);text-align:right;flex-shrink:0}
+.funnel-track{flex:1;background:var(--surface2);border-radius:4px;height:24px;overflow:hidden}
+.funnel-fill{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;transition:width .6s}
+.funnel-num{font-size:11px;font-weight:600;color:#fff;font-family:'DM Mono',monospace}
+.funnel-pct{width:38px;font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);text-align:right}
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden}
+.table-toolbar{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.search-box{flex:1;position:relative}
+.search-box input{width:100%;padding:7px 12px 7px 32px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);outline:none}
+.search-box input:focus{border-color:var(--accent)}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px}
+.filter-select{padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);outline:none;cursor:pointer}
+.btn{padding:7px 14px;border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;transition:all .12s;border:none;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#1a4de0}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{background:var(--surface2)}
+.btn-danger{background:var(--red-light);color:var(--red);border:1px solid #f5c6c2;font-size:11px;padding:4px 9px}
+.btn-sm{padding:4px 10px;font-size:12px}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;padding:10px 14px;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#faf9f7}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.etapa-select{font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);outline:none;cursor:pointer;max-width:155px}
+.kanban-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.kanban-col{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow)}
+.kanban-col-header{padding:12px 14px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.kanban-col-title{font-size:12px;font-weight:600}
+.kanban-count-pill{background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:11px;font-weight:600;color:var(--text2);padding:1px 8px;font-family:'DM Mono',monospace}
+.kanban-cards{padding:10px;min-height:80px}
+.kanban-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:7px;transition:box-shadow .12s;cursor:pointer}
+.kanban-card:hover{box-shadow:var(--shadow-md)}
+.kanban-card-name{font-size:13px;font-weight:500}
+.kanban-card-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.kanban-card-amount{font-size:12px;color:var(--green);font-weight:600;margin-top:5px;font-family:'DM Mono',monospace}
+.kanban-empty{font-size:12px;color:var(--text3);text-align:center;padding:16px 0;font-style:italic}
+.overlay{display:none;position:fixed;inset:0;background:rgba(20,18,14,.45);z-index:200;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius-lg);width:92%;max-width:700px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.18)}
+.modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:16px;font-weight:600;letter-spacing:-.3px}
+.modal-close{background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;line-height:1;padding:2px 6px;border-radius:6px}
+.modal-close:hover{background:var(--surface2)}
+.modal-tabs{display:flex;gap:0;border-bottom:1px solid var(--border)}
+.modal-tab{padding:10px 20px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;font-family:'DM Sans',sans-serif}
+.modal-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.modal-tab-pane{display:none;padding:20px 24px}
+.modal-tab-pane.active{display:block}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:12px;font-weight:500;color:var(--text2)}
+.form-input{padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);outline:none;transition:border-color .15s;width:100%}
+.form-input:focus{border-color:var(--accent);background:var(--surface)}
+textarea.form-input{resize:vertical;min-height:64px}
+.form-section-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 10px}
+.bitacora{display:flex;flex-direction:column}
+.bita-entry{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.bita-entry:last-child{border-bottom:none}
+.bita-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.bita-dot.auto{background:var(--accent)}
+.bita-dot.nota{background:var(--amber)}
+.bita-dot.sistema{background:var(--text3)}
+.bita-fecha{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:2px}
+.bita-texto{font-size:13px;color:var(--text)}
+.bita-add{display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.bita-add textarea{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);resize:none;height:60px;outline:none}
+.bita-add textarea:focus{border-color:var(--accent)}
+.alarma-overlay{display:none;position:fixed;inset:0;background:rgba(20,18,14,.5);z-index:300;align-items:center;justify-content:center}
+.alarma-overlay.open{display:flex}
+.alarma-box{background:var(--surface);border-radius:var(--radius-lg);width:92%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden}
+.alarma-header{padding:16px 22px;background:#fdf0ee;border-bottom:1px solid #f5c6c2;display:flex;align-items:center;gap:10px}
+.alarma-title{font-size:15px;font-weight:600;color:var(--red)}
+.alarma-body{padding:16px 22px;max-height:340px;overflow-y:auto}
+.alarma-lead{padding:10px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.alarma-lead:last-child{border-bottom:none}
+.alarma-lead-name{font-size:13px;font-weight:500}
+.alarma-lead-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.alarma-fecha{font-size:11px;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.af-vencido{background:var(--red-light);color:var(--red)}
+.af-hoy{background:var(--amber-light);color:var(--amber)}
+.af-manana{background:var(--green-light);color:var(--green)}
+.alarma-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end}
+.toast{position:fixed;bottom:24px;right:24px;background:#1a1814;color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.2);z-index:999;opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.empty-state{text-align:center;padding:48px 24px;color:var(--text3)}
+.empty-state h3{font-size:15px;font-weight:500;margin-bottom:6px;color:var(--text2)}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.charts-row{grid-template-columns:1fr}.kanban-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-text">Querido Marketing</div>
+      <div class="logo-sub">Pipeline · Sistema CRECE</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Principal</div>
+      <button class="nav-item active" onclick="switchPage('dashboard',this)"><span class="nav-icon">📊</span>Resumen</button>
+      <button class="nav-item" onclick="switchPage('kanban',this)"><span class="nav-icon">🗂</span>Kanban</button>
+      <button class="nav-item" onclick="switchPage('leads',this)"><span class="nav-icon">👥</span>Leads<span class="nav-badge" id="nav-total">0</span></button>
+      <div class="nav-section">Acciones</div>
+      <button class="nav-item" onclick="openModal()"><span class="nav-icon">➕</span>Nuevo lead</button>
+      <button class="nav-item" onclick="openWAModal()"><span class="nav-icon">💬</span>Pegar WhatsApp</button>
+      <button class="nav-item" id="nav-alarmas" style="display:none" onclick="checkAlarmas(true)"><span class="nav-icon">🔔</span>Alertas<span class="nav-badge red" id="nav-alarmas-count">0</span></button>
+    </nav>
+    <div class="sidebar-footer"><span id="sync-status">● modo local</span></div>
+  </aside>
+
+  <main class="main">
+    <header class="page-header">
+      <div><div class="page-title" id="page-title">Resumen del pipeline</div><div class="page-sub" id="page-sub">Vista general de métricas y conversión</div></div>
+      <button class="btn btn-primary" onclick="openModal()">+ Nuevo lead</button>
+    </header>
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page active">
+      <div class="kpi-grid" id="kpi-grid"></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:16px;box-shadow:var(--shadow)">
+        <span style="font-size:12px;font-weight:600;color:var(--text2);white-space:nowrap">Meta mensual</span>
+        <div style="flex:1;background:var(--surface2);border-radius:20px;height:10px;overflow:hidden"><div id="meta-bar" style="height:100%;border-radius:20px;background:var(--green);transition:width .6s;width:0%"></div></div>
+        <span id="meta-label" style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text2);white-space:nowrap">Define una meta</span>
+        <span style="font-size:12px;color:var(--text3)">Meta:</span>
+        <input id="meta-input" type="number" min="0" placeholder="0" style="width:120px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:'DM Mono',monospace;background:var(--bg);color:var(--text)" oninput="updateMeta()">
+        <span style="font-size:12px;color:var(--text3)">MXN</span>
+      </div>
+      <div class="charts-row">
+        <div class="chart-card"><h3>Leads este mes — día a día</h3><div style="position:relative;height:220px"><canvas id="chartMes"></canvas></div></div>
+        <div class="chart-card">
+          <h3 style="display:flex;align-items:center;justify-content:space-between">Este mes vs mes anterior
+            <span style="display:flex;gap:6px">
+              <span id="tab-leads" onclick="toggleComparativo('leads')" style="font-size:11px;padding:3px 10px;border-radius:20px;cursor:pointer;background:var(--accent);color:#fff;font-weight:500">Leads</span>
+              <span id="tab-dinero" onclick="toggleComparativo('dinero')" style="font-size:11px;padding:3px 10px;border-radius:20px;cursor:pointer;background:var(--surface2);color:var(--text2)">Dinero</span>
+            </span>
+          </h3>
+          <div style="position:relative;height:190px"><canvas id="chartComparativo"></canvas></div>
+        </div>
+      </div>
+      <div class="charts-row">
+        <div class="chart-card"><h3>Leads por fuente</h3><div style="position:relative;height:220px"><canvas id="chartFuente"></canvas></div></div>
+        <div class="chart-card"><h3>Dinero cerrado por fuente</h3><div style="position:relative;height:220px"><canvas id="chartDineroFuente"></canvas></div></div>
+      </div>
+      <div class="charts-row" style="margin-bottom:0">
+        <div class="chart-card"><h3>Leads por etapa</h3><div style="position:relative;height:220px"><canvas id="chartEtapa"></canvas></div></div>
+        <div class="funnel-card"><h3>Embudo de conversión</h3><div id="funnel-rows"></div></div>
+      </div>
+    </div>
+
+    <!-- KANBAN -->
+    <div id="page-kanban" class="page"><div class="kanban-grid" id="kanban-board"></div></div>
+
+    <!-- LEADS -->
+    <div id="page-leads" class="page">
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <div class="search-box"><span class="search-icon">🔍</span><input type="text" id="search-input" placeholder="Buscar por nombre, empresa..." oninput="renderTable()"></div>
+          <select class="filter-select" id="filter-etapa" onchange="renderTable()"><option value="">Todas las etapas</option></select>
+          <select class="filter-select" id="filter-fuente" onchange="renderTable()"><option value="">Todas las fuentes</option></select>
+          <button class="btn btn-ghost" onclick="exportCSV()">⬇ Exportar CSV</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>#</th><th>Nombre</th><th>Empresa</th><th>Etapa</th><th>Fuente</th><th>Responsable</th><th>Monto est.</th><th>Próxima acción</th><th>Cambiar etapa</th><th></th></tr></thead>
+            <tbody id="leads-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL LEAD -->
+<div class="overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Registrar nuevo lead</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="switchModalTab('datos',this)">Datos del lead</button>
+      <button class="modal-tab" id="tab-bita-btn" onclick="switchModalTab('bitacora',this)" style="display:none">Bitácora</button>
+    </div>
+    <div class="modal-tab-pane active" id="modal-tab-datos">
+      <div class="form-section-title">Datos del prospecto</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Nombre *</label><input class="form-input" id="f-nombre" placeholder="Nombre completo"></div>
+        <div class="form-group"><label class="form-label">Empresa / Negocio</label><input class="form-input" id="f-empresa" placeholder="Empresa o particular"></div>
+        <div class="form-group"><label class="form-label">Teléfono</label><input class="form-input" id="f-tel" placeholder="999 000 0000"></div>
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="f-email" type="email" placeholder="correo@ejemplo.com"></div>
+      </div>
+      <div class="form-section-title">Origen y servicio</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Fuente del lead</label>
+          <select class="form-input" id="f-fuente"><option>WhatsApp</option><option>Meta Ads</option><option>Google Ads</option><option>Formulario web</option><option>Landing page</option><option>Referido</option><option>Instagram</option><option>Otro</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Servicio de interés</label><input class="form-input" id="f-servicio" placeholder="Ej. Cotización, Consultoría..."></div>
+      </div>
+      <div class="form-section-title">Estado y seguimiento</div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Etapa actual</label>
+          <select class="form-input" id="f-etapa"><option>Lead nuevo</option><option>Contactado</option><option>Respondió</option><option>Calificado</option><option>Cita agendada</option><option>Cita realizada</option><option>Propuesta enviada</option><option>En seguimiento</option><option>Cerrado ganado</option><option>No calificado</option><option>No responde</option><option>Cerrado perdido</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Responsable</label><input class="form-input" id="f-resp" placeholder="Nombre del responsable"></div>
+        <div class="form-group"><label class="form-label">Monto estimado ($)</label><input class="form-input" id="f-monto" type="number" min="0" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Próxima acción</label><input class="form-input" id="f-accion" placeholder="Ej. Llamada de seguimiento"></div>
+        <div class="form-group"><label class="form-label">Fecha próxima acción</label><input class="form-input" id="f-fecha-accion" type="date"></div>
+      </div>
+      <div class="form-section-title">Notas</div>
+      <div class="form-group"><textarea class="form-input" id="f-obs" placeholder="Notas adicionales..."></textarea></div>
+    </div>
+    <div class="modal-tab-pane" id="modal-tab-bitacora">
+      <div class="bitacora" id="bitacora-list"></div>
+      <div class="bita-add">
+        <textarea id="bita-nueva-nota" placeholder="Escribe una nota o actualización del lead..."></textarea>
+        <button class="btn btn-primary btn-sm" style="align-self:flex-end" onclick="agregarNota()">Agregar nota</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveLead()" id="btn-save">Guardar lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- WA PASTE MODAL -->
+<div class="overlay" id="wa-overlay" onclick="if(event.target===this)closeWAModal()">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title">📋 Pegar mensaje de WhatsApp</div>
+      <button class="modal-close" onclick="closeWAModal()">×</button>
+    </div>
+    <div style="padding:20px 24px">
+      <div style="background:var(--green-light);border:1px solid #9fe1cb;border-radius:var(--radius);padding:14px 16px;margin-bottom:18px">
+        <div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:8px">📱 Mensaje de bienvenida — copia y usa en WhatsApp</div>
+        <div id="wa-template-text" style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-line">Hola, gracias por contactarnos 👋
+
+Para atenderte mejor necesito algunos datos:
+
+• Nombre:
+• Teléfono:
+• ¿Qué necesitas?:</div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="copyTemplate()">📋 Copiar mensaje</button>
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">Pega aquí la respuesta del prospecto</label>
+        <textarea class="form-input" id="wa-paste-area" rows="6" placeholder="Pega el mensaje de WhatsApp aquí..." oninput="parseWAMessage()"></textarea>
+      </div>
+      <div id="wa-preview" style="display:none;background:var(--surface2);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">Datos detectados</div>
+        <div id="wa-preview-fields"></div>
+      </div>
+      <div id="wa-no-match" style="display:none;background:var(--amber-light);border:1px solid #f4c775;border-radius:var(--radius);padding:12px 14px;font-size:13px;color:var(--amber);margin-bottom:16px">
+        No se detectaron datos con la estructura esperada. Revisa que el prospecto haya respondido con el formato del mensaje de bienvenida.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeWAModal()">Cancelar</button>
+      <button class="btn btn-primary" id="wa-btn-continuar" onclick="continueFromWA()" style="display:none">Continuar al formulario →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ALARMA -->
+<div class="alarma-overlay" id="alarma-overlay">
+  <div class="alarma-box">
+    <div class="alarma-header"><span style="font-size:20px">🔔</span><span class="alarma-title">Acciones pendientes</span></div>
+    <div class="alarma-body" id="alarma-body"></div>
+    <div class="alarma-footer"><button class="btn btn-primary" onclick="closeAlarma()">Entendido</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw48N5NQAOHeWty3EAqO7hNdQW6Fxs3L2Fsryz1symWoLbqLynbKG4hYffpRYJY7vXZwA/exec';
+
+const ETAPAS_FLUJO=['Lead nuevo','Contactado','Respondió','Calificado','Cita agendada','Cita realizada','Propuesta enviada','En seguimiento','Cerrado ganado'];
+const ETAPAS_SALIDA=['No calificado','No responde','Cerrado perdido'];
+const ETAPAS_TODAS=[...ETAPAS_FLUJO,...ETAPAS_SALIDA];
+const COLORS={'Lead nuevo':'#378ADD','Contactado':'#1D9E75','Respondió':'#639922','Calificado':'#BA7517','Cita agendada':'#7F77DD','Cita realizada':'#534AB7','Propuesta enviada':'#D4537E','En seguimiento':'#D85A30','Cerrado ganado':'#0F6E56','No calificado':'#888780','No responde':'#B4B2A9','Cerrado perdido':'#E24B4A'};
+const BADGE_BG={'Lead nuevo':'#deedf9','Contactado':'#d0f0e6','Respondió':'#e4f0d1','Calificado':'#fce9c8','Cita agendada':'#e8e7f9','Cita realizada':'#d9d7f0','Propuesta enviada':'#f9dce8','En seguimiento':'#f9e0d4','Cerrado ganado':'#c8e9df','No calificado':'#e8e7e5','No responde':'#eeedeb','Cerrado perdido':'#fde0df'};
+const FC=['#378ADD','#1D9E75','#7F77DD','#D85A30','#BA7517','#D4537E','#534AB7','#639922'];
+
+function loadData(){try{return JSON.parse(localStorage.getItem('crece_leads')||'[]');}catch{return[];}}
+function saveLocal(d){localStorage.setItem('crece_leads',JSON.stringify(d));}
+function syncToSheets(action,payload){
+  if(!APPS_SCRIPT_URL)return Promise.resolve();
+  return new Promise(resolve=>{
+    const url=APPS_SCRIPT_URL+'?data='+encodeURIComponent(JSON.stringify({action,...payload}));
+    const img=new Image();
+    img.onload=img.onerror=()=>resolve();
+    img.src=url;
+    setTimeout(resolve,3000);
+  });
+}
+function showSyncStatus(msg,ok=true){const el=document.getElementById('sync-status');if(!el)return;el.textContent=msg;el.style.color=ok?'var(--green)':'#c0392b';clearTimeout(el._t);el._t=setTimeout(()=>{el.textContent=APPS_SCRIPT_URL?'● conectado a Sheets':'● modo local';el.style.color=APPS_SCRIPT_URL?'var(--green)':'var(--text3)';},3000);}
+
+let leads=loadData();
+let nextId=leads.length?Math.max(...leads.map(l=>l.id))+1:1;
+let editingId=null;
+let metaMensual=Number(localStorage.getItem('crece_meta')||0);
+let comparativoMode='leads';
+
+function today(){return new Date().toISOString().split('T')[0];}
+function getMesActual(){const n=new Date();return{y:n.getFullYear(),m:n.getMonth()};}
+function getMesAnterior(){const n=new Date();n.setMonth(n.getMonth()-1);return{y:n.getFullYear(),m:n.getMonth()};}
+function leadsDeMes(y,m){return leads.filter(l=>{if(!l.fecha)return false;const d=new Date(l.fecha);return d.getFullYear()===y&&d.getMonth()===m;});}
+function cerradosDeMes(y,m){return leadsDeMes(y,m).filter(l=>l.etapa==='Cerrado ganado');}
+function fmtFecha(f){if(!f)return '';const d=new Date(f+'T12:00:00');return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});}
+function diasDiff(f){if(!f)return null;const t=new Date(today()),a=new Date(f);t.setHours(0,0,0,0);a.setHours(0,0,0,0);return Math.round((a-t)/(1000*60*60*24));}
+
+// ALARMAS
+function checkAlarmas(force=false){
+  const pendientes=leads.filter(l=>{
+    if(!l.fechaAccion||['Cerrado ganado','Cerrado perdido','No calificado'].includes(l.etapa))return false;
+    const d=diasDiff(l.fechaAccion);return d!==null&&d<=1;
+  });
+  const navBtn=document.getElementById('nav-alarmas'),navCount=document.getElementById('nav-alarmas-count');
+  if(pendientes.length>0){navBtn.style.display='flex';navCount.textContent=pendientes.length;}else{navBtn.style.display='none';}
+  if(force||(pendientes.length>0&&!sessionStorage.getItem('alarma_shown'))){
+    if(pendientes.length===0&&force){showToast('Sin alertas pendientes ✓');return;}
+    if(pendientes.length===0)return;
+    sessionStorage.setItem('alarma_shown','1');
+    document.getElementById('alarma-body').innerHTML=pendientes.map(l=>{
+      const d=diasDiff(l.fechaAccion);
+      const cls=d<0?'af-vencido':d===0?'af-hoy':'af-manana';
+      const lbl=d<0?`Vencido hace ${Math.abs(d)} día${Math.abs(d)>1?'s':''}`:d===0?'Hoy':'Mañana';
+      return `<div class="alarma-lead"><div><div class="alarma-lead-name">${l.nombre}</div><div class="alarma-lead-meta">${l.accion||'Acción pendiente'}${l.resp?' · '+l.resp:''}</div></div><span class="alarma-fecha ${cls}">${lbl}</span></div>`;
+    }).join('');
+    document.getElementById('alarma-overlay').classList.add('open');
+  }
+}
+function closeAlarma(){document.getElementById('alarma-overlay').classList.remove('open');}
+
+// KPIs
+function renderKPIs(){
+  const total=leads.length;
+  const activos=leads.filter(l=>ETAPAS_FLUJO.slice(0,-1).includes(l.etapa)).length;
+  const ganados=leads.filter(l=>l.etapa==='Cerrado ganado').length;
+  const valorCerrado=leads.filter(l=>l.etapa==='Cerrado ganado').reduce((s,l)=>s+(Number(l.monto)||0),0);
+  const estimado=leads.filter(l=>ETAPAS_FLUJO.slice(0,-1).includes(l.etapa)).reduce((s,l)=>s+(Number(l.monto)||0),0);
+  const tasa=total>0?Math.round(ganados/total*100):0;
+  document.getElementById('kpi-grid').innerHTML=`
+    <div class="kpi-card"><div class="kpi-label">Total leads</div><div class="kpi-value">${total}</div><div class="kpi-delta delta-neu">registrados</div></div>
+    <div class="kpi-card"><div class="kpi-label">Activos</div><div class="kpi-value">${activos}</div><div class="kpi-delta delta-neu">en proceso</div></div>
+    <div class="kpi-card"><div class="kpi-label">Tasa de cierre</div><div class="kpi-value">${tasa}%</div><div class="kpi-delta ${tasa>=20?'delta-pos':'delta-neg'}">${tasa>=20?'↑ buena tasa':'↓ mejorar'}</div></div>
+    <div class="kpi-card hl-green"><div class="kpi-label">Cerrados ganados</div><div class="kpi-value">${ganados}</div><div class="kpi-delta delta-pos">✓ convertidos</div></div>
+    <div class="kpi-card hl-green"><div class="kpi-label">Valor cerrado</div><div class="kpi-value">$${valorCerrado.toLocaleString('es-MX')}</div><div class="kpi-delta delta-neu">MXN</div></div>
+    <div class="kpi-card hl-blue"><div class="kpi-label">Estimado pipeline</div><div class="kpi-value">$${estimado.toLocaleString('es-MX')}</div><div class="kpi-delta delta-neu">potencial activo</div></div>
+  `;
+}
+
+// META
+function updateMeta(){metaMensual=Number(document.getElementById('meta-input').value)||0;localStorage.setItem('crece_meta',metaMensual);renderMetaBanner();}
+function renderMetaBanner(){
+  const{y,m}=getMesActual();
+  const real=cerradosDeMes(y,m).reduce((s,l)=>s+(Number(l.monto)||0),0);
+  const pct=metaMensual>0?Math.min(100,Math.round(real/metaMensual*100)):0;
+  const bar=document.getElementById('meta-bar'),lbl=document.getElementById('meta-label'),inp=document.getElementById('meta-input');
+  if(bar){bar.style.width=pct+'%';bar.style.background=pct>=100?'#1a7f5a':pct>=60?'#BA7517':'#E24B4A';}
+  if(lbl)lbl.textContent=metaMensual>0?'$'+real.toLocaleString('es-MX')+' / $'+metaMensual.toLocaleString('es-MX')+' ('+pct+'%)':'Define una meta arriba';
+  if(inp&&!inp.value&&metaMensual)inp.value=metaMensual;
+}
+
+// CHARTS
+let chartE=null,chartF=null,chartMes=null,chartComp=null,chartDF=null;
+function byEtapa(){const m={};ETAPAS_TODAS.forEach(e=>m[e]=0);leads.forEach(l=>{if(m[l.etapa]!==undefined)m[l.etapa]++;});return m;}
+
+function renderCharts(){
+  const byE=byEtapa();
+  const labelsE=ETAPAS_TODAS.filter(e=>byE[e]>0),dataE=labelsE.map(e=>byE[e]),colorsE=labelsE.map(e=>COLORS[e]||'#888');
+  if(chartE)chartE.destroy();
+  const ctxE=document.getElementById('chartEtapa');
+  if(ctxE)chartE=new Chart(ctxE,{type:'bar',data:{labels:labelsE,datasets:[{data:dataE,backgroundColor:colorsE,borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},maxRotation:40,autoSkip:false},grid:{display:false}},y:{ticks:{stepSize:1,font:{size:11}},grid:{color:'#f0ede6'}}}}});
+  const fuentes={};leads.forEach(l=>{fuentes[l.fuente]=(fuentes[l.fuente]||0)+1;});
+  const fl=Object.keys(fuentes),fd=fl.map(k=>fuentes[k]);
+  if(chartF)chartF.destroy();
+  const ctxF=document.getElementById('chartFuente');
+  if(ctxF){if(fl.length===0){ctxF.parentElement.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:220px;font-size:13px;color:#9e9b96">Sin datos aún</div>';}
+  else chartF=new Chart(ctxF,{type:'doughnut',data:{labels:fl,datasets:[{data:fd,backgroundColor:FC.slice(0,fl.length),hoverOffset:6,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:10,padding:10}}}}});}
+}
+
+function renderChartMes(){
+  const{y,m}=getMesActual();const hoy=new Date().getDate();
+  const labels=Array.from({length:hoy},(_,i)=>i+1);
+  const data=labels.map(d=>leads.filter(l=>{if(!l.fecha)return false;const ld=new Date(l.fecha);return ld.getFullYear()===y&&ld.getMonth()===m&&ld.getDate()===d;}).length);
+  if(chartMes)chartMes.destroy();
+  const ctx=document.getElementById('chartMes');if(!ctx)return;
+  chartMes=new Chart(ctx,{type:'bar',data:{labels,datasets:[{data,backgroundColor:'#378ADD',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},autoSkip:true,maxTicksLimit:15},grid:{display:false}},y:{ticks:{stepSize:1,font:{size:10}},grid:{color:'#f0ede6'}}}}});
+}
+
+function toggleComparativo(mode){
+  comparativoMode=mode;
+  ['leads','dinero'].forEach(t=>{const el=document.getElementById('tab-'+t);if(!el)return;el.style.background=t===mode?'var(--accent)':'var(--surface2)';el.style.color=t===mode?'#fff':'var(--text2)';});
+  renderChartComparativo();
+}
+function renderChartComparativo(){
+  const curr=getMesActual(),prev=getMesAnterior();
+  const meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  let vCurr,vPrev;
+  if(comparativoMode==='leads'){vCurr=leadsDeMes(curr.y,curr.m).length;vPrev=leadsDeMes(prev.y,prev.m).length;}
+  else{vCurr=cerradosDeMes(curr.y,curr.m).reduce((s,l)=>s+(Number(l.monto)||0),0);vPrev=cerradosDeMes(prev.y,prev.m).reduce((s,l)=>s+(Number(l.monto)||0),0);}
+  if(chartComp)chartComp.destroy();
+  const ctx=document.getElementById('chartComparativo');if(!ctx)return;
+  chartComp=new Chart(ctx,{type:'bar',data:{labels:[meses[prev.m]+' '+prev.y,meses[curr.m]+' '+curr.y],datasets:[{data:[vPrev,vCurr],backgroundColor:['#B4B2A9','#378ADD'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:11}},grid:{display:false}},y:{ticks:{font:{size:10},callback:v=>comparativoMode==='dinero'?'$'+v.toLocaleString('es-MX'):v},grid:{color:'#f0ede6'}}}}});
+}
+function renderChartDineroFuente(){
+  const fd2={};leads.filter(l=>l.etapa==='Cerrado ganado').forEach(l=>{fd2[l.fuente]=(fd2[l.fuente]||0)+(Number(l.monto)||0);});
+  const fl=Object.keys(fd2),fv=fl.map(k=>fd2[k]);
+  if(chartDF)chartDF.destroy();
+  const ctx=document.getElementById('chartDineroFuente');if(!ctx)return;
+  if(fl.length===0){ctx.parentElement.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:220px;font-size:13px;color:#9e9b96">Sin cierres aún</div>';return;}
+  chartDF=new Chart(ctx,{type:'bar',data:{labels:fl,datasets:[{data:fv,backgroundColor:FC.slice(0,fl.length),borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},maxRotation:30},grid:{display:false}},y:{ticks:{font:{size:10},callback:v=>'$'+v.toLocaleString('es-MX')},grid:{color:'#f0ede6'}}}}});
+}
+
+// FUNNEL
+function renderFunnel(){
+  const byE=byEtapa(),first=byE['Lead nuevo']||0,max=Math.max(1,...ETAPAS_FLUJO.map(e=>byE[e]));
+  document.getElementById('funnel-rows').innerHTML=ETAPAS_FLUJO.map(e=>{
+    const n=byE[e],pct=Math.round(n/max*100),conv=first>0?Math.round(n/first*100):0;
+    return `<div class="funnel-row"><div class="funnel-label">${e}</div><div class="funnel-track"><div class="funnel-fill" style="width:${n>0?Math.max(pct,5):0}%;background:${COLORS[e]}">${n>0?`<span class="funnel-num">${n}</span>`:''}</div></div><div class="funnel-pct">${n>0?conv+'%':'—'}</div></div>`;
+  }).join('');
+}
+
+// KANBAN
+function renderKanban(){
+  document.getElementById('kanban-board').innerHTML=ETAPAS_FLUJO.slice(0,6).map(etapa=>{
+    const ll=leads.filter(l=>l.etapa===etapa);
+    const cards=ll.length===0?'<div class="kanban-empty">Sin leads</div>':ll.map(l=>`<div class="kanban-card" onclick="openLeadModal(${l.id})"><div class="kanban-card-name">${l.nombre}</div><div class="kanban-card-meta">${l.empresa||''}${l.resp?' · '+l.resp:''}</div>${l.monto?`<div class="kanban-card-amount">$${Number(l.monto).toLocaleString('es-MX')}</div>`:''}</div>`).join('');
+    return `<div class="kanban-col"><div class="kanban-col-header"><span class="kanban-col-title" style="color:${COLORS[etapa]}">${etapa}</span><span class="kanban-count-pill">${ll.length}</span></div><div class="kanban-cards">${cards}</div></div>`;
+  }).join('');
+}
+
+// TABLE
+function populateFilters(){
+  const selE=document.getElementById('filter-etapa'),selF=document.getElementById('filter-fuente');
+  const cE=selE.value,cF=selF.value;
+  while(selE.options.length>1)selE.remove(1);while(selF.options.length>1)selF.remove(1);
+  [...new Set(leads.map(l=>l.etapa))].forEach(e=>{const o=new Option(e,e);selE.add(o);});
+  [...new Set(leads.map(l=>l.fuente).filter(Boolean))].forEach(f=>{const o=new Option(f,f);selF.add(o);});
+  if([...selE.options].map(o=>o.value).includes(cE))selE.value=cE;
+  if([...selF.options].map(o=>o.value).includes(cF))selF.value=cF;
+}
+function renderTable(){
+  const q=document.getElementById('search-input').value.toLowerCase();
+  const fe=document.getElementById('filter-etapa').value,ff=document.getElementById('filter-fuente').value;
+  const lista=leads.filter(l=>{const mQ=!q||l.nombre.toLowerCase().includes(q)||(l.empresa||'').toLowerCase().includes(q);return mQ&&(!fe||l.etapa===fe)&&(!ff||l.fuente===ff);});
+  const tbody=document.getElementById('leads-tbody');
+  if(lista.length===0){tbody.innerHTML=`<tr><td colspan="10"><div class="empty-state"><h3>Sin resultados</h3><p>No hay leads que coincidan.</p></div></td></tr>`;return;}
+  tbody.innerHTML=lista.map(l=>{
+    const d=diasDiff(l.fechaAccion);
+    const alerta=d!==null&&d<=1&&!['Cerrado ganado','Cerrado perdido','No calificado'].includes(l.etapa)?(d<0?'🔴 ':'🟡 '):'';
+    const bitCount=(l.bitacora||[]).length;
+    return `<tr>
+      <td style="color:#9e9b96;font-family:'DM Mono',monospace;font-size:11px">${l.id}</td>
+      <td style="font-weight:500"><span style="cursor:pointer;color:var(--accent)" onclick="openLeadModal(${l.id})">${l.nombre}</span>${bitCount>0?`<span style="font-size:10px;color:var(--text3);margin-left:5px">📋${bitCount}</span>`:''}  </td>
+      <td style="color:#6b6760">${l.empresa||'—'}</td>
+      <td><span class="badge" style="background:${BADGE_BG[l.etapa]||'#eee'};color:${COLORS[l.etapa]||'#666'}">${l.etapa}</span></td>
+      <td>${l.fuente||'—'}</td>
+      <td>${l.resp||'—'}</td>
+      <td style="font-family:'DM Mono',monospace">${l.monto?'$'+Number(l.monto).toLocaleString('es-MX'):'—'}</td>
+      <td style="font-size:12px;color:#6b6760">${alerta}${l.accion||'—'}${l.fechaAccion?` <span style="color:var(--text3);font-size:11px">(${fmtFecha(l.fechaAccion)})</span>`:''}</td>
+      <td><select class="etapa-select" onchange="changeStage(${l.id},this.value)">${ETAPAS_TODAS.map(e=>`<option${e===l.etapa?' selected':''}>${e}</option>`).join('')}</select></td>
+      <td style="display:flex;gap:5px"><button class="btn btn-ghost btn-sm" onclick="openLeadModal(${l.id})" title="Editar / Bitácora">✏</button><button class="btn btn-danger" onclick="deleteLead(${l.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// MODAL
+function switchModalTab(name,btn){
+  document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.modal-tab-pane').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('modal-tab-'+name).classList.add('active');
+  if(name==='bitacora')renderBitacora();
+}
+function openModal(){
+  editingId=null;
+  document.getElementById('modal-title').textContent='Registrar nuevo lead';
+  document.getElementById('btn-save').textContent='Guardar lead';
+  document.getElementById('tab-bita-btn').style.display='none';
+  ['nombre','empresa','tel','email','servicio','resp','monto','accion','obs'].forEach(f=>{const el=document.getElementById('f-'+f);if(el)el.value='';});
+  document.getElementById('f-fecha-accion').value='';
+  document.getElementById('f-fuente').value='WhatsApp';
+  document.getElementById('f-etapa').value='Lead nuevo';
+  switchModalTab('datos',document.querySelector('.modal-tab'));
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('f-nombre').focus(),100);
+}
+function openLeadModal(id){
+  editingId=id;const l=leads.find(x=>x.id===id);if(!l)return;
+  document.getElementById('modal-title').textContent='Lead: '+l.nombre;
+  document.getElementById('btn-save').textContent='Guardar cambios';
+  document.getElementById('tab-bita-btn').style.display='';
+  document.getElementById('f-nombre').value=l.nombre||'';
+  document.getElementById('f-empresa').value=l.empresa||'';
+  document.getElementById('f-tel').value=l.tel||'';
+  document.getElementById('f-email').value=l.email||'';
+  document.getElementById('f-fuente').value=l.fuente||'WhatsApp';
+  document.getElementById('f-servicio').value=l.servicio||'';
+  document.getElementById('f-etapa').value=l.etapa||'Lead nuevo';
+  document.getElementById('f-resp').value=l.resp||'';
+  document.getElementById('f-monto').value=l.monto||'';
+  document.getElementById('f-accion').value=l.accion||'';
+  document.getElementById('f-fecha-accion').value=l.fechaAccion||'';
+  document.getElementById('f-obs').value=l.obs||'';
+  switchModalTab('datos',document.querySelector('.modal-tab'));
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');editingId=null;}
+function closeModalOutside(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
+
+function saveLead(){
+  const nombre=document.getElementById('f-nombre').value.trim();
+  if(!nombre){showToast('El nombre es requerido ⚠');return;}
+  const data={nombre,empresa:document.getElementById('f-empresa').value.trim(),tel:document.getElementById('f-tel').value.trim(),email:document.getElementById('f-email').value.trim(),fuente:document.getElementById('f-fuente').value,servicio:document.getElementById('f-servicio').value.trim(),etapa:document.getElementById('f-etapa').value,resp:document.getElementById('f-resp').value.trim(),monto:Number(document.getElementById('f-monto').value)||0,accion:document.getElementById('f-accion').value.trim(),fechaAccion:document.getElementById('f-fecha-accion').value,obs:document.getElementById('f-obs').value.trim()};
+  if(editingId){
+    const idx=leads.findIndex(l=>l.id===editingId);
+    if(idx!==-1){
+      const prev=leads[idx].etapa;
+      leads[idx]={...leads[idx],...data};
+      if(prev!==data.etapa)_addBita(editingId,'auto',`Etapa: "${prev}" → "${data.etapa}"`);
+      else _addBita(editingId,'auto','Datos actualizados');
+    }
+    showToast('Lead actualizado ✓');
+    syncToSheets('update',{id:editingId,...data}).then(()=>showSyncStatus('✓ actualizado en Sheets'));
+  } else {
+    const newLead={id:nextId++,fecha:today(),bitacora:[{fecha:today(),tipo:'sistema',texto:'Lead registrado en el pipeline'}],...data};
+    leads.push(newLead);
+    showToast('Lead guardado ✓');
+    syncToSheets('save',newLead).then(()=>showSyncStatus('✓ guardado en Sheets'));
+  }
+  saveLocal(leads);closeModal();renderAll();
+}
+
+// BITÁCORA
+function _addBita(id,tipo,texto){const l=leads.find(x=>x.id===id);if(!l)return;if(!l.bitacora)l.bitacora=[];l.bitacora.push({fecha:today(),tipo,texto});saveLocal(leads);}
+function renderBitacora(){
+  const l=leads.find(x=>x.id===editingId);if(!l)return;
+  const entradas=(l.bitacora||[]).slice().reverse();
+  document.getElementById('bitacora-list').innerHTML=entradas.length===0
+    ?'<div style="color:var(--text3);font-size:13px;padding:16px 0;text-align:center;font-style:italic">Sin entradas aún</div>'
+    :entradas.map(e=>`<div class="bita-entry"><div class="bita-dot ${e.tipo}"></div><div class="bita-content"><div class="bita-fecha">${fmtFecha(e.fecha)}</div><div class="bita-texto">${e.texto}</div></div></div>`).join('');
+  document.getElementById('bita-nueva-nota').value='';
+}
+function agregarNota(){
+  const txt=document.getElementById('bita-nueva-nota').value.trim();if(!txt)return;
+  _addBita(editingId,'nota',txt);renderBitacora();showToast('Nota agregada ✓');
+}
+
+// STAGE CHANGE
+function changeStage(id,etapa){
+  const l=leads.find(x=>x.id===id);if(!l)return;
+  const prev=l.etapa;l.etapa=etapa;
+  _addBita(id,'auto',`Etapa: "${prev}" → "${etapa}"`);
+  saveLocal(leads);
+  syncToSheets('update',{id,etapa}).then(()=>showSyncStatus('✓ etapa actualizada'));
+  renderAll();
+}
+function deleteLead(id){
+  if(!confirm('¿Eliminar este lead del pipeline?'))return;
+  leads=leads.filter(l=>l.id!==id);saveLocal(leads);
+  syncToSheets('delete',{id}).then(()=>showSyncStatus('✓ eliminado en Sheets'));
+  renderAll();showToast('Lead eliminado');
+}
+
+// EXPORT
+function exportCSV(){
+  const headers=['ID','Fecha','Nombre','Empresa','Teléfono','Email','Fuente','Servicio','Etapa','Responsable','Monto','Próxima acción','Fecha acción','Observaciones'];
+  const rows=leads.map(l=>[l.id,l.fecha,l.nombre,l.empresa,l.tel,l.email,l.fuente,l.servicio,l.etapa,l.resp,l.monto,l.accion,l.fechaAccion,l.obs].map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(','));
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+[headers.join(','),...rows].join('\n')],{type:'text/csv;charset=utf-8'}));a.download=`pipeline-crece-${today()}.csv`;a.click();
+}
+
+// TOAST
+let toastTimer;
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2500);}
+
+// NAV
+const PAGE_META={dashboard:{title:'Resumen del pipeline',sub:'Vista general de métricas y conversión'},kanban:{title:'Vista Kanban',sub:'Distribución visual de leads por etapa'},leads:{title:'Todos los leads',sub:'Listado completo con filtros y gestión'}};
+function switchPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+  document.getElementById('page-title').textContent=PAGE_META[name].title;
+  document.getElementById('page-sub').textContent=PAGE_META[name].sub;
+}
+
+function renderAll(){
+  document.getElementById('nav-total').textContent=leads.length;
+  renderKPIs();renderMetaBanner();
+  renderCharts();renderChartMes();renderChartComparativo();renderChartDineroFuente();
+  renderFunnel();renderKanban();populateFilters();renderTable();
+  checkAlarmas();
+}
+
+
+// ── WHATSAPP PASTE ────────────────────────────────────────────────
+const WA_TEMPLATE = `Hola, gracias por contactarnos 👋
+
+Para atenderte mejor necesito algunos datos:
+
+• Nombre:
+• Teléfono:
+• ¿Qué necesitas?:`;
+
+let waParsed = {};
+
+function openWAModal(){
+  document.getElementById('wa-overlay').classList.add('open');
+  document.getElementById('wa-paste-area').value='';
+  document.getElementById('wa-preview').style.display='none';
+  document.getElementById('wa-no-match').style.display='none';
+  document.getElementById('wa-btn-continuar').style.display='none';
+  waParsed={};
+  setTimeout(()=>document.getElementById('wa-paste-area').focus(),100);
+}
+function closeWAModal(){document.getElementById('wa-overlay').classList.remove('open');}
+
+function copyTemplate(){
+  navigator.clipboard.writeText(WA_TEMPLATE).then(()=>showToast('Mensaje copiado ✓')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=WA_TEMPLATE;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast('Mensaje copiado ✓');
+  });
+}
+
+function parseWAMessage(){
+  const text = document.getElementById('wa-paste-area').value.trim();
+  if(!text){document.getElementById('wa-preview').style.display='none';document.getElementById('wa-no-match').style.display='none';document.getElementById('wa-btn-continuar').style.display='none';return;}
+  
+  waParsed = {};
+  
+  // Detect structured format (• Nombre: valor)
+  const patterns = [
+    {field:'nombre', regex:/[•\-\*]?\s*nombre\s*[:\-]\s*(.+)/i},
+    {field:'tel',    regex:/[•\-\*]?\s*tel[eé]fono\s*[:\-]\s*(.+)/i},
+    {field:'servicio',regex:/[•\-\*]?\s*(?:qu[eé]\s+necesitas|servicio|producto|inter[eé]s)\s*[:\-]\s*(.+)/i},
+  ];
+  
+  patterns.forEach(p=>{
+    const m=text.match(p.regex);
+    if(m&&m[1].trim()&&m[1].trim().toLowerCase()!=='')waParsed[p.field]=m[1].trim();
+  });
+
+  // Fallback: detect phone number anywhere (10 digits)
+  if(!waParsed.tel){
+    const phoneMatch=text.match(/(?:^|\s)(\d{2,3}[\s\-]?\d{3,4}[\s\-]?\d{4})(?:\s|$)/m);
+    if(phoneMatch)waParsed.tel=phoneMatch[1].replace(/[\s\-]/g,'');
+  }
+
+  // Fallback: first line that's not a greeting = probable name
+  if(!waParsed.nombre){
+    const lines=text.split('
+').map(l=>l.trim()).filter(l=>l&&l.length>2&&l.length<60);
+    const greetings=/^(hola|buenos|buenas|hey|hi|saludos|buen)/i;
+    const firstNonGreet=lines.find(l=>!greetings.test(l)&&!/\d{7,}/.test(l));
+    if(firstNonGreet)waParsed.nombre=firstNonGreet.replace(/^[•\-\*]\s*/,'');
+  }
+
+  const hasData=Object.keys(waParsed).length>0;
+  document.getElementById('wa-preview').style.display=hasData?'':'none';
+  document.getElementById('wa-no-match').style.display=hasData?'none':'';
+  document.getElementById('wa-btn-continuar').style.display=hasData?'':'none';
+
+  if(hasData){
+    const labels={nombre:'Nombre',tel:'Teléfono',servicio:'Qué necesita'};
+    document.getElementById('wa-preview-fields').innerHTML=Object.entries(waParsed).map(([k,v])=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:11px;font-weight:600;color:var(--text3);width:90px;flex-shrink:0">${labels[k]||k}</span>
+        <span style="font-size:13px;color:var(--text)">${v}</span>
+      </div>`).join('');
+  }
+}
+
+function continueFromWA(){
+  closeWAModal();
+  openModal();
+  // Fill fields with parsed data
+  if(waParsed.nombre)document.getElementById('f-nombre').value=waParsed.nombre;
+  if(waParsed.tel)document.getElementById('f-tel').value=waParsed.tel;
+  if(waParsed.servicio)document.getElementById('f-servicio').value=waParsed.servicio;
+  document.getElementById('f-fuente').value='WhatsApp';
+  showToast('Datos prellenados — revisa y completa');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeAlarma();closeWAModal();}});
+const ss=document.getElementById('sync-status');
+ss.textContent = APPS_SCRIPT_URL ? '● conectado a Sheets' : '● modo local';
+ss.style.color = APPS_SCRIPT_URL ? 'var(--green)' : 'var(--text3)';
+renderAll();
+setTimeout(()=>checkAlarmas(),600);
+</script>
+</body>
+</html>
